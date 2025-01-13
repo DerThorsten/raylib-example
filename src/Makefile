@@ -127,17 +127,17 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
     endif
 endif
 
-ifeq ($(PLATFORM_OS),WINDOWS)
-    ifeq ($(PLATFORM),PLATFORM_WEB)
-        # Emscripten required variables
-        EMSDK_PATH         ?= C:/raylib/emsdk
-        EMSCRIPTEN_PATH    ?= $(EMSDK_PATH)/upstream/emscripten
-        CLANG_PATH          = $(EMSDK_PATH)/upstream/bin
-        PYTHON_PATH         = $(EMSDK_PATH)/python/3.9.2-nuget_64bit
-        NODE_PATH           = $(EMSDK_PATH)/node/20.18.0_64bit/bin
-        export PATH         = $(EMSDK_PATH);$(EMSCRIPTEN_PATH);$(CLANG_PATH);$(NODE_PATH);$(PYTHON_PATH):$$(PATH)
-    endif
+
+ifeq ($(PLATFORM),PLATFORM_WEB)
+    # Emscripten required variables
+    EMSDK_PATH         ?= ~/src/emsdk
+    EMSCRIPTEN_PATH    ?= $(EMSDK_PATH)/upstream/emscripten
+    CLANG_PATH          = $(EMSDK_PATH)/upstream/bin
+    PYTHON_PATH         = $(EMSDK_PATH)/python/3.9.2_64bit
+    NODE_PATH           = $(EMSDK_PATH)/node/20.18.0_64bit/bin
+    export PATH         = $(EMSDK_PATH);$(EMSCRIPTEN_PATH);$(CLANG_PATH);$(NODE_PATH);$(PYTHON_PATH):$$(PATH)
 endif
+
 
 # Define default C compiler: CC
 #------------------------------------------------------------------------------------------------
@@ -156,8 +156,8 @@ endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
     # HTML5 emscripten compiler
     # WARNING: To compile to HTML5, code must be redesigned
-    # to use emscripten.h and emscripten_set_main_loop()
-    CC = emcc
+    # to use .emscriptenh and emscripten_set_main_loop()
+    CC = $(EMSCRIPTEN_PATH)/emcc
 endif
 ifeq ($(PLATFORM),PLATFORM_DRM)
     ifeq ($(USE_RPI_CROSS_COMPILER),TRUE)
@@ -362,6 +362,7 @@ endif
 # Default target entry
 # NOTE: We call this Makefile target or Makefile.Android target
 all:
+    # print EMSCRIPTEN_PATH
 	$(MAKE) $(MAKEFILE_TARGET)
 
 # Project target defined by PROJECT_NAME

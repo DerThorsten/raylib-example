@@ -8,6 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Dependencies
 set(RAYLIB_VERSION 5.0)
+set(RAYGUI_VERSION 4.0)
 
 FetchContent_Declare(
     raylib
@@ -15,8 +16,9 @@ FetchContent_Declare(
     URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
     FIND_PACKAGE_ARGS
 )
-
 FetchContent_MakeAvailable(raylib)
+
+
 
 # Our Project
 add_executable(${PROJECT_NAME})
@@ -43,6 +45,13 @@ endif()
 
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
+
+# include RAYGUI_SRC
+target_include_directories(${PROJECT_NAME} PRIVATE ${RAYGUI_SRC})
+
+message(STATUS "RAYGUI_SRC: ${RAYGUI_SRC}")
+
+message(STATUS "RAYGUI_SRC: ${raygui_RAYGUI_SRC}")
 
 # Web Configurations
 if ("${PLATFORM}" STREQUAL "Web")
