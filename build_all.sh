@@ -10,6 +10,8 @@ popd
 
 mkdir -p build_emscripten
 pushd build_emscripten
+unset LDFLAGS
+unset LDFLAGS_U
 emcmake cmake .. -DPLATFORM=Web
 emmake make -j4
 popd

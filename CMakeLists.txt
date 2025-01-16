@@ -18,6 +18,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
+FetchContent_Declare(
+	box2d
+	GIT_REPOSITORY https://github.com/DerThorsten/box2d.git
+	GIT_TAG main
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(box2d)
+
 
 
 # Our Project
@@ -34,7 +43,15 @@ if ("${PLATFORM}" STREQUAL "Web")
         TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>/../resources
     )
-    #DEPENDS ${PROJECT_NAME}
+    SET(HTML_PATH ${CMAKE_SOURCE_DIR}/run.html)
+
+    # copy html after each build to the output directory
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${HTML_PATH} $<TARGET_FILE_DIR:${PROJECT_NAME}>/index.html
+    )
+
+
 else()
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
@@ -56,7 +73,7 @@ message(STATUS "RAYGUI_SRC: ${raygui_RAYGUI_SRC}")
 # Web Configurations
 if ("${PLATFORM}" STREQUAL "Web")
     # Tell Emscripten to build an example.html file.
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
+    # set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
     target_link_options(${PROJECT_NAME} PUBLIC -sUSE_GLFW=3 PUBLIC --preload-file resources)
 endif()
 
