@@ -13,77 +13,108 @@
 #include <iostream>
 
 #include <pg/ray_main.hpp>
-#include <pg/main_loop.hpp>
-#include <pg/window.hpp>
-#include <pg/platform.hpp>
+#include <pg/engine.hpp>
 
 
-struct MyMainLoop : public pg::MainLoop<MyMainLoop>
+
+
+enum class ScreenID : std::size_t
 {
+    Start,
+    Menue
+};
 
 
-    void update()
-    {
+
+class StartScreen : public pg::Screen
+{
+public:
+
+    StartScreen(pg::Engine & engine): pg::Screen(engine){
+        m_font = LoadFontEx("resources/font/Monoton/Monoton-Regular.ttf", 100, 0, 250);
+        // Generate mipmap levels to use trilinear filtering
+        // NOTE: On 2D drawing it won't be noticeable, it looks like FILTER_BILINEAR
+        GenTextureMipmaps(&m_font.texture);
+    }
+
+    void on_update() override{
 
 
-        ballPosition.x += ballSpeed.x;
-        ballPosition.y += ballSpeed.y;
+        // is mouse clicked?
+        auto m = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
-        // Check walls collision for bouncing
-        if ((ballPosition.x >= (GetScreenWidth() - ballRadius)) || (ballPosition.x <= ballRadius)) ballSpeed.x *= -1.0f;
-        if ((ballPosition.y >= (GetScreenHeight() - ballRadius)) || (ballPosition.y <= ballRadius)) ballSpeed.y *= -1.0f;
+        if(m || this->time_since_enter() > 5.0){
+            this->screen_manager().transition_to_screen((std::size_t)ScreenID::Menue);
+        }
+    }
+    void on_render() override{
 
-        if (IsKeyDown(KEY_RIGHT)) ballPosition.x += 2.0f;
-        else if (IsKeyDown(KEY_LEFT)) ballPosition.x -= 2.0f;
-        if (IsKeyDown(KEY_DOWN)) ballPosition.y += 2.0f;
-        else if (IsKeyDown(KEY_UP)) ballPosition.y -= 2.0f;
-
-        BeginDrawing();
         ClearBackground(BLACK);
 
+        float fontSize = (float)m_font.baseSize * 1.0f;
 
-         DrawCircleV(ballPosition, (float)ballRadius, MAROON);
-            static     float width = 200.0f;
+        const char *msg = "Start Screen";
 
-            auto r = GuiSliderBar(
-                (Rectangle){ 640, 40, 105, 20 }, 
-                "Width", TextFormat("%.2f", width), 
-                &width, 
-                0, 
-                (float)GetScreenWidth() - 300
-            );
+        auto textSize = MeasureTextEx(m_font, msg, fontSize, 0);
+        Vector2 fontPosition = { 40.0f, GetScreenHeight()/2.0f - 80.0f };
+        DrawTextEx(m_font, msg, fontPosition, fontSize, 0, BLUE);
 
-        EndDrawing();
     }
-    bool should_stop()
-    {
-        return WindowShouldClose();
-    }
-    
-
-    Vector2 ballPosition = { GetScreenWidth()/2.0f, GetScreenHeight()/2.0f };
-    Vector2 ballSpeed = { 5.0f, 4.0f };
-    int ballRadius = 20;
-
-    bool pause = 0;
-    int framesCounter = 0;
+private:
+    Font m_font;
 };
+
+class MenueScreen : public pg::Screen
+{
+public:
+
+    MenueScreen(pg::Engine & engine): pg::Screen(engine){
+        m_font = LoadFontEx("resources/font/Monoton/Monoton-Regular.ttf", 100, 0, 250);
+        // Generate mipmap levels to use trilinear filtering
+        // NOTE: On 2D drawing it won't be noticeable, it looks like FILTER_BILINEAR
+        GenTextureMipmaps(&m_font.texture);
+    }
+
+    void on_update() override{
+        // is mouse clicked?
+        auto m = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+        if(m || this->time_since_enter() > 5.0){
+            this->screen_manager().transition_to_screen((std::size_t)ScreenID::Start);
+        }
+    }
+    void on_render() override{
+        ClearBackground(BLACK);
+
+        float fontSize = (float)m_font.baseSize * 1.0f;
+
+        const char *msg = "Menue Screen";
+
+        auto textSize = MeasureTextEx(m_font, msg, fontSize, 0);
+        Vector2 fontPosition = { 40.0f, GetScreenHeight()/2.0f - 80.0f };
+        DrawTextEx(m_font, msg, fontPosition, fontSize, 0, BLUE);
+    }
+private:
+    Font m_font;
+};
+
+
+
+
 
 
 int main(void)
 {   
     
 
+    pg::EngineSettings settings;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
-    const std::size_t screenWidth = 800;
-    const std::size_t screenHeight = 450;
-    pg::Window window(screenWidth, screenHeight, "raylib [shapes] example - basic shapes drawing");
+    pg::Engine engine;
+    auto & screen_manager = engine.screen_manager();
+    screen_manager.add_screen(std::make_unique<StartScreen>(engine));
+    screen_manager.add_screen(std::make_unique<MenueScreen>(engine));
 
-
-    MyMainLoop loop;
-    loop.run(60);
+    engine.run();
 
     return 0;
 }
